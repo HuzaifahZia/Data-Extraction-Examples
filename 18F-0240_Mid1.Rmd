@@ -1,0 +1,131 @@
+---
+title: "Data Science Sessional 1 Exam Fall 2021"
+author: "18F-0240"
+date: "10/26/2021"
+output: pdf_document
+github link: "https://github.com/HuzaifahZia/Data-Extraction-Examples.git" 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## "https://cran.r-project.org/web/packages/pdftools/pdftools.pdf"
+## Perform OCR text extraction. This requires you have the tesseract package.
+## using pdftools and tessract library 
+
+```{r}
+library("pdftools")
+pdf = "E10/e_10_gasoline_price_notification_effective_dated_april_01_2017.pdf"
+x = pdf_ocr_text(pdf,pages = 1,opw = "",upw = "",language = "eng",dpi = 550)
+x
+library(data.table)
+fread(gsub("(?<=[a-z])\\s+", "\n", x, perl=TRUE))
+##pdf_ocr_data(pdf,pages = 2,opw = "",upw = "",language = "eng",dpi = 600)
+```
+## "https://cran.r-project.org/web/packages/pdftools/pdftools.pdf"
+## Perform OCR text extraction. This requires you have the tesseract package.
+## using pdftools and tessract library 
+
+```{r}
+library("pdftools")
+pdf = "E10/e_10_gasoline_price_notification_effective_dated_april_01_2017.pdf"
+pdf_convert(pdf, format = "png", pages = 1, filenames = NULL, dpi = 600, antialias = TRUE, opw = "", upw = "", verbose = TRUE)
+poppler_config()
+library(magrittr)
+library(magick)
+img <- image_read("e_10_gasoline_price_notification_effective_dated_april_01_2017_1.png") %>% 
+  image_transparent("white", fuzz=82) %>% 
+  image_background("white") %>%
+  image_negate() %>%
+  image_morphology(method = "Thinning", kernel = "Rectangle:20x1+0+0^<") %>%
+  image_negate() %>%
+  image_crop(geometry_area(0, 0, 80, 25)) 
+
+img
+```
+## reading extracted image
+## after preprocessing it
+## "https://themockup.blog/posts/2021-01-18-reading-tables-from-images-with-magick/"
+
+
+```{r}
+library(tidyverse)
+library(magick)
+library(tesseract)
+raw_img <- image_read("e_10_gasoline_price_notification_effective_dated_april_01_2017_2.png")
+image_ggplot(raw_img)
+raw_img %>% 
+  image_crop(geometry_area(0, 0, 110, 45)) %>% 
+  ocr()
+raw_img %>% 
+  image_quantize(colorspace = "gray") %>% 
+  image_ggplot()
+no_grid <- raw_img %>% 
+  image_quantize(colorspace = "gray") %>% 
+   image_transparent(color = "white", fuzz=20) %>% 
+   image_background("white") 
+
+image_ggplot(no_grid)
+
+no_grid %>%
+  image_negate() %>% # negate
+  image_morphology(method = "Thinning", kernel = "Rectangle:20x1") %>%
+  image_negate() %>% # back to white
+  image_ggplot()
+
+data = no_grid %>% 
+  image_ocr()
+
+```
+
+```{r}
+raw_tibble <- data %>% 
+  str_split(pattern = "\n") %>% 
+  unlist() %>%
+  tibble(data = .) 
+
+raw_tibble
+```
+
+```{r}
+library("docxtractr")
+pdf = "E10/e_10_gasoline_price_notification_effective_dated_april_01_2017.pdf"
+a = docx_extract_tbl(docx,tbl_number = 2,header = TRUE,preserve = FALSE,trim = TRUE)
+```
+
+```{r}
+library("docxtractr")
+doc = "e_10_gasoline_price_notification_effective_dated_april_01_2018.docx"
+complx <- read_docx(doc,track_changes = "accept")
+docx_tbl_count(complx)
+q = docx_extract_tbl(complx , tbl_number = 2 , header = TRUE , preserve = FALSE , trim = TRUE)
+q
+q [,4]
+```
+
+```{r}
+library(pdftools)
+library("tabulizerjars")
+library("tabulizer")
+library(tidyverse)
+pdf = "E10/e_10_gasoline_price_notification_effective_dated_april_01_2017.pdf"
+statement <- extract_tables(
+  file   = pdf, 
+  method = "decide")
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
